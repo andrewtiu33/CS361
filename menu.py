@@ -51,6 +51,10 @@ def about_pokemon():
     resize_window(550, 245, top)
 
 
+def play():
+    canvas.delete('all')
+
+
 def resize_window(w, h, window):
     """Takes as input the width, height and name of new window and centers it."""
     # Set the width and height of the window
@@ -96,7 +100,7 @@ how_butt.config(height=3, width=15)
 
 how_butt.pack(side=BOTTOM, padx='0', pady='10', anchor=CENTER)
 
-play_butt = tkinter.Button(root, text="Play", bg="#FFCC00", fg="black")
+play_butt = tkinter.Button(root, text="Play", bg="#FFCC00", fg="black", command=play)
 play_butt.config(height=3, width=15)
 
 play_butt.pack(side=BOTTOM, padx='0', pady='10', anchor=CENTER)
