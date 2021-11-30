@@ -3,6 +3,7 @@ from tkinter import *
 import tkinter.font as font
 import socket
 import json
+import random, os
 from PIL import Image, ImageTk
 
 
@@ -11,14 +12,14 @@ def how_to_play():
     top = Toplevel(root)
     top.title("How to Play")
     top.configure(background='#0075BE')
-    Label(top, bg='#0075BE', fg="#FFCC00", text="Simply press play to begin! \n "
+    Label(top, bg='#0075BE', fg="#FFCC00", justify=CENTER, text="Simply press play to begin! \n "
                     "Type the name of the Pokémon you think is displayed in the textbox. \n"
                     "You have 3 lives. If you guess wrongly you lose a life. \n"
                     "Press hint if you are stuck to get one letter in the answer! \n"
                     "When you run out of lives it is Game Over and your score will be displayed \n"
-                    "Good luck and have fun making new high scores!").pack(side=LEFT)
+                    "Good luck and have fun making new high scores!").pack()
 
-    resize_window(490, 200, top)
+    resize_window(750, 200, top)
 
 
 def about_pokemon():
@@ -48,11 +49,44 @@ def about_pokemon():
     """End socket communication."""
     c.close()
 
-    resize_window(550, 245, top)
+    resize_window(750, 420, top)
 
 
 def play():
     canvas.delete('all')
+    about_butt.pack_forget()
+    how_butt.pack_forget()
+    play_butt.pack_forget()
+    Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Who's that Pokémon?", justify=CENTER).pack()
+
+    path = './pokemon_images/'
+    random_poke_image = random.choice([
+        x for x in os.listdir(path)
+        if os.path.isfile(os.path.join(path, x))
+    ])
+
+    path += random_poke_image
+    print(path)
+
+    random_poke = Image.open(path)
+    random_poke = random_poke.resize((400, 400), Image.ANTIALIAS)
+    random_poke = ImageTk.PhotoImage(random_poke)
+    label = Label(image=random_poke, background='#0075BE', justify=CENTER)
+    label.image = random_poke
+    label.pack()
+
+
+    # Remove the .png characters
+    random_poke_name = random_poke_image[:-4]
+
+
+
+
+
+
+
+
+
 
 
 def resize_window(w, h, window):
@@ -78,7 +112,7 @@ root = Tk()
 # Set default font to arial
 defaultFont = font.nametofont("TkDefaultFont")
 defaultFont.configure(family="Arial",
-                           size=10,
+                           size=17,
                            weight=font.BOLD)
 
 # Make a window for the game GUI
@@ -90,17 +124,17 @@ resize_window(900, 750, root)
 root.configure(background='#0075BE')
 
 # Buttons
-about_butt = tkinter.Button(root, text="About Pokémon", bg="#FFCC00", fg="black", command=about_pokemon)
+about_butt = tkinter.Button(root, text="About Pokémon", bg="#FFCC00", fg="black", command=about_pokemon, highlightbackground='#FFCC00')
 about_butt.config(height=3, width=15)
 
 about_butt.pack(side=BOTTOM, padx='0', pady='10', anchor='center')
 
-how_butt = tkinter.Button(root, text="How to Play", bg="#FFCC00", fg="black", command=how_to_play)
+how_butt = tkinter.Button(root, text="How to Play", bg="#FFCC00", fg="black", command=how_to_play, highlightbackground='#FFCC00')
 how_butt.config(height=3, width=15)
 
 how_butt.pack(side=BOTTOM, padx='0', pady='10', anchor=CENTER)
 
-play_butt = tkinter.Button(root, text="Play", bg="#FFCC00", fg="black", command=play)
+play_butt = tkinter.Button(root, text="Play", bg="#FFCC00", fg="black", command=play,  highlightbackground='#FFCC00')
 play_butt.config(height=3, width=15)
 
 play_butt.pack(side=BOTTOM, padx='0', pady='10', anchor=CENTER)
@@ -119,6 +153,5 @@ canvas = Canvas(root, bg="#0075BE", width=400, height=900, highlightthickness=0)
 canvas.pack()
 canvas.create_image(10, -100, image=logo, anchor=NW)
 canvas.create_image(75, 200, image=pikachu, anchor=NW)
-
 
 root.mainloop()
