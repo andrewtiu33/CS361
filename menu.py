@@ -53,6 +53,7 @@ def about_pokemon():
 
 
 def play():
+    # Clear the canvas
     canvas.delete('all')
     about_butt.pack_forget()
     how_butt.pack_forget()
@@ -75,9 +76,10 @@ def play():
     label.image = random_poke
     label.pack()
 
-
     # Remove the .png characters
     random_poke_name = random_poke_image[:-4]
+
+
 
 
 
