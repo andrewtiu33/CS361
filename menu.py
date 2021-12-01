@@ -3,6 +3,7 @@ from tkinter import *
 import tkinter.font as font
 import socket
 import json
+import csv
 import random, os
 from PIL import Image, ImageTk
 
@@ -28,47 +29,72 @@ def about_pokemon():
     top.title("About Pokemon")
     top.configure(background='#0075BE')
 
-    """Begin communication with teammate's microservice."""
+    # Begin communication with teammate's microservice
     host = socket.gethostname()
     port = 7634
 
     c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     c.connect((host, port))
 
-    """Send query to scrape summary from Pokemon wikipedia page."""
+    # Send query to scrape summary from Pokemon wikipedia page
     message = {"url":"https://en.wikipedia.org/wiki/Pokémon", "summary":"true"}
     request = json.dumps(message)
 
     c.send(request.encode("utf-8"))
     response = c.recv(8196).decode("utf-8")
-    parsedResponse = json.loads(response)
+    parsed_response = json.loads(response)
 
-    """Place the parsed response in a label."""
-    Label(top, bg='#0075BE', fg="#FFCC00", text=parsedResponse["summary"][:971], wraplength=500, justify=CENTER).pack()
+    # Place the parsed response in a label
+    Label(top, bg='#0075BE', fg="#FFCC00", text=parsed_response["summary"][:971], wraplength=500, justify=CENTER).pack()
 
-    """End socket communication."""
+    # End socket communication
     c.close()
-
     resize_window(750, 420, top)
 
 
 def play():
-    # Clear the canvas
-    canvas.delete('all')
-    about_butt.pack_forget()
-    how_butt.pack_forget()
-    play_butt.pack_forget()
-    Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Who's that Pokémon?", justify=CENTER).pack()
+    """Code that runs when the game is started."""
 
+    def submit_name():
+        """Retrieves the name submitted from the user."""
+        guess = user_input.get()
+        if guess == random_poke_name:
+            print("correct")
+        else:
+            print("wrong")
+
+    def get_hint(pokemon_name):
+        """Gives a hint to a user. Calls excel microservice."""
+        HOST = 'localhost'  # The server's hostname or IP address
+        PORT = 1443  # The port used by the server
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((HOST, PORT))
+        message = pokemon_name
+        sock.send(message.encode('utf-8'))
+        response = sock.recv(400)
+        Label(bg='#0075BE', fg="#FFCC00", text=response, wraplength=500, justify=CENTER).pack()
+
+    def clear_canvas():
+        """Clears the canvas and inserts game title"""
+        # Clear the canvas and add game title
+        canvas.delete('all')
+        about_butt.pack_forget()
+        how_butt.pack_forget()
+        play_butt.pack_forget()
+        Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Who's that Pokémon?", justify=CENTER).pack()
+
+    clear_canvas()
+
+    # Get the random pokemon list
     path = './pokemon_images/'
-    random_poke_image = random.choice([
-        x for x in os.listdir(path)
-        if os.path.isfile(os.path.join(path, x))
-    ])
+    poke_list = [x for x in os.listdir(path) if os.path.isfile(os.path.join(path, x))]
 
+    # Choose a random pokemon from the list and then remove it from the pool
+    random_poke_image = random.choice(poke_list)
+    poke_list.remove(random_poke_image)
+
+    # Display the random pokemon image
     path += random_poke_image
-    print(path)
-
     random_poke = Image.open(path)
     random_poke = random_poke.resize((400, 400), Image.ANTIALIAS)
     random_poke = ImageTk.PhotoImage(random_poke)
@@ -76,19 +102,24 @@ def play():
     label.image = random_poke
     label.pack()
 
-    # Remove the .png characters
+    # Remove the .png characters to get the character name to be guessed
     random_poke_name = random_poke_image[:-4]
+    print(random_poke_name)
 
+    Label(bg="#0075BE", font=("Arial", 30, 'bold'), text="Your Answer:").pack()
 
+    # Create the guess input box
+    user_input = Entry(root, font=("Arial", 20), justify="center")
+    user_input.pack()
+    user_input.focus()
 
+    # Create a submit button
+    submit = Button(text="Submit", font=("Arial", 20), width=10, command=submit_name)
+    submit.pack(pady=20)
 
-
-
-
-
-
-
-
+    # Create a hint button
+    hint = tkinter.Button(root, text="Hint", font=("Arial", 20), width=10, command=lambda: get_hint(random_poke_name))
+    hint.pack()
 
 
 def resize_window(w, h, window):
