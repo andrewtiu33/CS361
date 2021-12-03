@@ -67,7 +67,6 @@ def play():
     def refresh_screen():
         """Refreshes the screen to have a new Pokemon and hint after an answer is entered"""
         new_poke_image, new_poke = get_random_pokemon(poke_list)
-        print(len(poke_list))
         displayed_hint["text"] = ""
         current_poke_label.configure(image=new_poke_image)
         current_poke_label.image = new_poke_image
@@ -87,13 +86,20 @@ def play():
         score_label.pack_forget()
 
     def game_over():
+        """Displays game over screen when the game is over."""
+        # Display the score
         nonlocal score
         Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Congratulations!", justify=CENTER).pack()
-        Label(canvas, bg="#0075BE", fg="#FFCC00",  font=("Arial", 50, 'bold'), text="Your final score was:", justify=CENTER).pack(pady=50)
-        Label(canvas, bg="#0075BE", fg="#FFCC00", font=("Arial", 50, 'bold'), text=str(score), justify=CENTER).pack()
-        
+        Label(canvas, bg="#0075BE",  font=("Arial", 50, 'bold'), text="Your final score was:", justify=CENTER).pack(pady=30)
+        Label(canvas, bg="#0075BE", fg="#FFCC00", font=("Arial", 60, 'bold'), text=str(score), justify=CENTER).pack()
 
+        # Load the end image
+        global end_image
+        end_image = Image.open('./images/gameover.jpg')
+        end_image = ImageTk.PhotoImage(end_image)
 
+        end_image_label = Label(canvas, bg="#0075BE", image=end_image, justify=CENTER)
+        end_image_label.pack(pady=30)
 
     def submit_name(correct_answer):
         """Takes as input the correct answer. Checks if user's input is the correct answer"""
@@ -103,12 +109,10 @@ def play():
 
         # If the user's guess was correct, add to score, clear hint and switch the image
         if guess == correct_answer:
-            print("correct")
             score += 10
 
         # If user's guess was wrong, decrease score, clear hint and switch the image
         else:
-            print("wrong")
             score -= 10
 
         question_num += 1
@@ -179,14 +183,12 @@ def play():
 
     # Create a space for the Pokemon image
     current_poke_image, current_poke = get_random_pokemon(poke_list)
-    print(len(poke_list))
     current_poke_label = Label(image=current_poke_image, background='#0075BE', justify=CENTER)
     current_poke_label.image = current_poke_image
     current_poke_label.pack()
 
     # Remove the .png characters to get the character name to be guessed
     current_poke_name = current_poke[:-4]
-    print(current_poke_name)
 
     # Create the label for user's answer
     your_answer = Label(bg="#0075BE", font=("Arial", 30, 'bold'), text="Your Answer:")
