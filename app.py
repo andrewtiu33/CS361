@@ -74,19 +74,25 @@ def play():
         current_poke_label.image = new_poke_image
         nonlocal current_poke_name
         current_poke_name = new_poke[:-4]
+        hint["state"] = NORMAL
 
     def submit_name(correct_answer):
         """Takes as input the correct answer. Checks if user's input is the correct answer"""
         guess = user_input.get().lower()
+        nonlocal score
 
         # If the user's guess was correct, add to score, clear hint and switch the image
         if guess == correct_answer:
             print("correct")
+            score += 10
+            score_label["text"] = "Current Score: " + str(score)
             refresh_screen()
 
         # If user's guess was wrong, decrease score, clear hint and switch the image
         else:
             print("wrong")
+            score -= 10
+            score_label["text"] = "Current Score: " + str(score)
             refresh_screen()
 
     def get_hint(pokemon_name):
@@ -100,6 +106,14 @@ def play():
         response = sock.recv(400)
         displayed_hint["text"] = response
         print(response)
+
+        # Update score
+        nonlocal score
+        score -= 5
+        score_label["text"] = "Current Score: " + str(score)
+
+        # Disable button
+        hint["state"] = DISABLED
 
     def get_random_pokemon(poke_list):
         path = './pokemon_images/'
