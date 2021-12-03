@@ -52,16 +52,42 @@ def about_pokemon():
     resize_window(750, 420, top)
 
 
+def clear_canvas():
+    """Clears the canvas and inserts game title"""
+    # Clear the canvas and add game title
+    canvas.delete('all')
+    about_butt.pack_forget()
+    how_butt.pack_forget()
+    play_butt.pack_forget()
+    Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Who's that Pokémon?", justify=CENTER).pack()
+
+
 def play():
     """Code that runs when the game is started."""
 
-    def submit_name():
-        """Retrieves the name submitted from the user."""
-        guess = user_input.get()
-        if guess == random_poke_name:
+    def refresh_screen():
+        """Refreshes the screen to have a new Pokemon and hint after an answer is entered"""
+        new_poke_image, new_poke = get_random_pokemon(poke_list)
+        print(len(poke_list))
+        displayed_hint["text"] = ""
+        current_poke_label.configure(image=new_poke_image)
+        current_poke_label.image = new_poke_image
+        nonlocal current_poke_name
+        current_poke_name = new_poke[:-4]
+
+    def submit_name(correct_answer):
+        """Takes as input the correct answer. Checks if user's input is the correct answer"""
+        guess = user_input.get().lower()
+
+        # If the user's guess was correct, add to score, clear hint and switch the image
+        if guess == correct_answer:
             print("correct")
+            refresh_screen()
+
+        # If user's guess was wrong, decrease score, clear hint and switch the image
         else:
             print("wrong")
+            refresh_screen()
 
     def get_hint(pokemon_name):
         """Gives a hint to a user. Calls excel microservice."""
@@ -72,41 +98,51 @@ def play():
         message = pokemon_name
         sock.send(message.encode('utf-8'))
         response = sock.recv(400)
-        Label(bg='#0075BE', fg="#FFCC00", text=response, wraplength=500, justify=CENTER).pack()
+        displayed_hint["text"] = response
+        print(response)
 
-    def clear_canvas():
-        """Clears the canvas and inserts game title"""
-        # Clear the canvas and add game title
-        canvas.delete('all')
-        about_butt.pack_forget()
-        how_butt.pack_forget()
-        play_butt.pack_forget()
-        Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Who's that Pokémon?", justify=CENTER).pack()
+    def get_random_pokemon(poke_list):
+        path = './pokemon_images/'
+
+        # Choose a random pokemon from the list and then removes it from the pool
+        random_poke = random.choice(poke_list)
+        poke_list.remove(random_poke)
+
+        path += random_poke
+        random_poke_image = Image.open(path)
+        random_poke_image = random_poke_image.resize((350, 350), Image.ANTIALIAS)
+        random_poke_image = ImageTk.PhotoImage(random_poke_image)
+        return random_poke_image, random_poke
 
     clear_canvas()
+
+    # Create a score display label
+    score = 0
+    score_label = Label(bg="#0075BE", font=("Arial", 30, 'bold'), text="Current Score: " + str(score))
+    score_label.pack(pady=10)
+
 
     # Get the random pokemon list
     path = './pokemon_images/'
     poke_list = [x for x in os.listdir(path) if os.path.isfile(os.path.join(path, x))]
 
-    # Choose a random pokemon from the list and then remove it from the pool
-    random_poke_image = random.choice(poke_list)
-    poke_list.remove(random_poke_image)
+    # Remove the ds store file so no errors are caused
+    poke_list.remove('.DS_Store')
 
-    # Display the random pokemon image
-    path += random_poke_image
-    random_poke = Image.open(path)
-    random_poke = random_poke.resize((400, 400), Image.ANTIALIAS)
-    random_poke = ImageTk.PhotoImage(random_poke)
-    label = Label(image=random_poke, background='#0075BE', justify=CENTER)
-    label.image = random_poke
-    label.pack()
+    # Create a space for the Pokemon image
+    current_poke_image, current_poke = get_random_pokemon(poke_list)
+    print(len(poke_list))
+    current_poke_label = Label(image=current_poke_image, background='#0075BE', justify=CENTER)
+    current_poke_label.image = current_poke_image
+    current_poke_label.pack()
 
     # Remove the .png characters to get the character name to be guessed
-    random_poke_name = random_poke_image[:-4]
-    print(random_poke_name)
+    current_poke_name = current_poke[:-4]
+    print(current_poke_name)
 
-    Label(bg="#0075BE", font=("Arial", 30, 'bold'), text="Your Answer:").pack()
+    # Create the label for user's answer
+    your_answer = Label(bg="#0075BE", font=("Arial", 30, 'bold'), text="Your Answer:")
+    your_answer.pack()
 
     # Create the guess input box
     user_input = Entry(root, font=("Arial", 20), justify="center")
@@ -114,12 +150,16 @@ def play():
     user_input.focus()
 
     # Create a submit button
-    submit = Button(text="Submit", font=("Arial", 20), width=10, command=submit_name)
+    submit = Button(text="Submit", font=("Arial", 20), width=10, command=lambda: submit_name(current_poke_name))
     submit.pack(pady=20)
 
     # Create a hint button
-    hint = tkinter.Button(root, text="Hint", font=("Arial", 20), width=10, command=lambda: get_hint(random_poke_name))
+    hint = tkinter.Button(root, text="Hint", font=("Arial", 20), width=10, command=lambda: get_hint(current_poke_name))
     hint.pack()
+
+    # Create placeholder for hint
+    displayed_hint = Label(bg='#0075BE', fg="#FFCC00", wraplength=500, justify=CENTER)
+    displayed_hint.pack(pady=10)
 
 
 def resize_window(w, h, window):
