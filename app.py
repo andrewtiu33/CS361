@@ -72,7 +72,7 @@ def play():
         current_poke_label.image = new_poke_image
         user_input.delete(0, END)
         nonlocal current_poke_name
-        current_poke_name = new_poke[:-4]
+        current_poke_name = new_poke
         hint["state"] = NORMAL
 
     def clear_screen():
@@ -159,7 +159,7 @@ def play():
         random_poke_image = Image.open(path)
         random_poke_image = random_poke_image.resize((350, 350), Image.ANTIALIAS)
         random_poke_image = ImageTk.PhotoImage(random_poke_image)
-        return random_poke_image, random_poke
+        return random_poke_image, random_poke[:-4]
 
     clear_canvas()
 
@@ -182,14 +182,11 @@ def play():
     # Remove the ds store file so no errors are caused
     poke_list.remove('.DS_Store')
 
-    # Create a space for the Pokemon image
-    current_poke_image, current_poke = get_random_pokemon(poke_list)
+    # Create a label for the Pokemon image
+    current_poke_image, current_poke_name = get_random_pokemon(poke_list)
     current_poke_label = Label(image=current_poke_image, background='#0075BE', justify=CENTER)
     current_poke_label.image = current_poke_image
     current_poke_label.pack()
-
-    # Remove the .png characters to get the character name to be guessed
-    current_poke_name = current_poke[:-4]
 
     # Create the label for user's answer
     your_answer = Label(bg="#0075BE", font=("Arial", 30, 'bold'), text="Your Answer:")
@@ -231,21 +228,26 @@ def resize_window(w, h, window):
     window.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
 
+def set_background():
+    """Sets the bakcground and font of the game."""
+    # Set default font to arial
+    defaultFont = font.nametofont("TkDefaultFont")
+    defaultFont.configure(family="Arial",
+                          size=17,
+                          weight=font.BOLD)
+
+    # Make a window for the game GUI
+    root.title("Who's that Pokémon?")
+
+    resize_window(900, 750, root)
+
+    # set the background color
+    root.configure(background='#0075BE')
+
+
 root = Tk()
 
-# Set default font to arial
-defaultFont = font.nametofont("TkDefaultFont")
-defaultFont.configure(family="Arial",
-                           size=17,
-                           weight=font.BOLD)
-
-# Make a window for the game GUI
-root.title("Who's that Pokémon?")
-
-resize_window(900, 750, root)
-
-# set the background color
-root.configure(background='#0075BE')
+set_background()
 
 # Buttons
 about_butt = tkinter.Button(root, text="About Pokémon", bg="#FFCC00", fg="black", command=about_pokemon, highlightbackground='#FFCC00')
