@@ -15,9 +15,9 @@ def how_to_play():
     top.configure(background='#0075BE')
     Label(top, bg='#0075BE', fg="#FFCC00", justify=CENTER, text="Simply press play to begin! \n "
                     "Type the name of the Pokémon you think is displayed in the textbox. \n"
-                    "You have 3 lives. If you guess wrongly you lose a life. \n"
-                    "Press hint if you are stuck to get one letter in the answer! \n"
-                    "When you run out of lives it is Game Over and your score will be displayed \n"
+                    "A correct answer is +10 points! A wrong answer is -10 points!\n"
+                    "If you are stuck, use the hint button to see the first letter in exchange for 5 points. \n"
+                    "After 10 questions, the game is over and your score is displayed.\n"
                     "Good luck and have fun making new high scores!").pack()
 
     resize_window(750, 200, top)
@@ -70,6 +70,7 @@ def play():
         displayed_hint["text"] = ""
         current_poke_label.configure(image=new_poke_image)
         current_poke_label.image = new_poke_image
+        user_input.delete(0, END)
         nonlocal current_poke_name
         current_poke_name = new_poke[:-4]
         hint["state"] = NORMAL
@@ -129,6 +130,7 @@ def play():
 
     def get_hint(pokemon_name):
         """Gives a hint to a user. Calls excel microservice."""
+        # Use teammate's microservice to get hint
         HOST = 'localhost'  # The server's hostname or IP address
         PORT = 1443  # The port used by the server
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -137,7 +139,6 @@ def play():
         sock.send(message.encode('utf-8'))
         response = sock.recv(400)
         displayed_hint["text"] = response
-        print(response)
 
         # Update score
         nonlocal score
