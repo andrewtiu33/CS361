@@ -53,13 +53,12 @@ def about_pokemon():
 
 
 def clear_canvas():
-    """Clears the canvas and inserts game title"""
+    """Clears the canvas."""
     # Clear the canvas and add game title
     canvas.delete('all')
     about_butt.pack_forget()
     how_butt.pack_forget()
     play_butt.pack_forget()
-    Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Who's that Pokémon?", justify=CENTER).pack()
 
 
 def play():
@@ -76,22 +75,51 @@ def play():
         current_poke_name = new_poke[:-4]
         hint["state"] = NORMAL
 
+    def clear_screen():
+        """This function removes everything from the screen. Used when game is over"""
+        # Remove everything from canvas
+        title.pack_forget()
+        submit.pack_forget()
+        hint.pack_forget()
+        your_answer.pack_forget()
+        user_input.pack_forget()
+        current_poke_label.pack_forget()
+        score_label.pack_forget()
+
+    def game_over():
+        nonlocal score
+        Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Congratulations!", justify=CENTER).pack()
+        Label(canvas, bg="#0075BE", fg="#FFCC00",  font=("Arial", 50, 'bold'), text="Your final score was:", justify=CENTER).pack(pady=50)
+        Label(canvas, bg="#0075BE", fg="#FFCC00", font=("Arial", 50, 'bold'), text=str(score), justify=CENTER).pack()
+        
+
+
+
     def submit_name(correct_answer):
         """Takes as input the correct answer. Checks if user's input is the correct answer"""
         guess = user_input.get().lower()
+        nonlocal question_num
         nonlocal score
 
         # If the user's guess was correct, add to score, clear hint and switch the image
         if guess == correct_answer:
             print("correct")
             score += 10
-            score_label["text"] = "Current Score: " + str(score)
-            refresh_screen()
 
         # If user's guess was wrong, decrease score, clear hint and switch the image
         else:
             print("wrong")
             score -= 10
+
+        question_num += 1
+
+        # If the question number is 10, end the game
+        if question_num == 11:
+            clear_screen()
+            game_over()
+
+        # If the question number is not 10, continue the game
+        else:
             score_label["text"] = "Current Score: " + str(score)
             refresh_screen()
 
@@ -130,11 +158,17 @@ def play():
 
     clear_canvas()
 
+    # Track the question number with a counter
+    question_num = 1
+
+    # Display the game title
+    title = Label(canvas, bg="#0075BE", font=("Arial", 60, 'bold'), text="Who's that Pokémon?", justify=CENTER)
+    title.pack()
+
     # Create a score display label
     score = 0
     score_label = Label(bg="#0075BE", font=("Arial", 30, 'bold'), text="Current Score: " + str(score))
     score_label.pack(pady=10)
-
 
     # Get the random pokemon list
     path = './pokemon_images/'
